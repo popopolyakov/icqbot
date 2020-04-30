@@ -8,7 +8,6 @@ dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 TOKEN = os.getenv('TOKEN')
 
-
 bot = Bot(token=TOKEN)
 
 def message_cb(bot, event):
