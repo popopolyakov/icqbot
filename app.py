@@ -7,13 +7,13 @@ import json
 import requests
 
 
-dotenv_path = join(dirname(__file__), '.env')
+dotenv_path = join(dirname(__file__), 'token.env')
 load_dotenv(dotenv_path)
 TOKEN = os.getenv('TOKEN')
 
 bot = Bot(token=TOKEN)
 
-#ПРОВЕРКА КОДА
+
 
 # class tests(user):
 #     def __init__(self):
@@ -60,22 +60,32 @@ def testcommands(bot, event):
     curUser=event.data['from']['userId']
     print('Log',log, '          Stage true?', stage == '0')
     bot.send_text(chat_id=curUser, text=log)
-    msg_id=event.data['message']['msgId']
-    print(msg_id)
+
     if stage == '0':
         print('Hallo')
+        msg_id = bot.send_text(chat_id=curUser, text="Message to be edited").json()['msgId']
         bot.edit_text(chat_id=curUser, msg_id=msg_id, text="edited text",
                       inline_keyboard_markup="{}".format(json.dumps([[
-                {"text": "Action 1", "callbackData": "1_2"},
-                {"text": "Action 2", "callbackData": "1_2"},
+                {"text": "Action 1", "callbackData": "1_0"},
+                {"text": "Action 2", "callbackData": "1_0", "style": "attention"},
             ]])))
+        bot.answer_callback_query(
+            query_id=event.data['queryId'],
+            text=log,
+            show_alert=False,
+            inline_keyboard_markup="{}".format(json.dumps([[
+                {"text": "Action 1", "url": "http://mail.ru"},
+                {"text": "Action 2", "callbackData": "0_0", "style": "attention"},
+            ]]))
+        )
     if stage == '1':
-        bot.edit_text(chat_id=curUser, msg_id=msg_id, text="edited text",
-                      inline_keyboard_markup="{}".format(json.dumps([[
-                          {"text": "Action 1", "callbackData": "1_2"},
-                          {"text": "Action 2", "callbackData": "1_2"},
-                      ]])))
-   if stage == '2':
+        print('Hallo')
+        bot.answer_callback_query(
+            query_id=event.data['queryId'],
+            text=log,
+            show_alert=False
+        )
+   # if stage == '2':
 
 
 
