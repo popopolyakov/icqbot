@@ -23,7 +23,7 @@ def message_cb(bot, event):
     totalCases=data['total_cases']
     totalRecovered=data['total_recovered']
     print(totalCases,totalRecovered)
-    covidinfo='Всего заразившихся %s!' % totalCases
+    covidinfo='Всего заразившихся '+totalCases+'!'
     print(covidinfo)
     bot.send_text(chat_id=event.from_chat, text=covidinfo)
 
