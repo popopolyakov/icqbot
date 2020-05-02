@@ -13,7 +13,7 @@ TOKEN = os.getenv('TOKEN')
 
 bot = Bot(token=TOKEN)
 
-
+#ПРОВЕРКА КОДА
 
 # class tests(user):
 #     def __init__(self):
