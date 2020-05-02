@@ -19,8 +19,7 @@ bot = Bot(token=TOKEN)
 #     def __init__(self):
 
 def startmes(bot, event):
-    if event.data['msgId']['text'] == '/start':
-        bot.send_text(chat_id=event.from_chat, text='Привет')
+    bot.send_text(chat_id=event.from_chat, text='Привет')
 
 def message_cb(bot, event):
     text=requests.get('https://api.thevirustracker.com/free-api',params={'global': 'stats'},)
@@ -64,6 +63,7 @@ def testcommands(bot, event):
     print(msg_id)
     if stage == '0':
         print('Hallo')
+        newCount=
         bot.edit_text(chat_id=curUser, msg_id=msg_id, text="edited text",
                       inline_keyboard_markup="{}".format(json.dumps([[
                 {"text": "Action 1", "callbackData": "1_2"},
@@ -75,7 +75,7 @@ def testcommands(bot, event):
                           {"text": "Action 1", "callbackData": "1_2"},
                           {"text": "Action 2", "callbackData": "1_2"},
                       ]])))
-   if stage == '2':
+   #if stage == '2':
 
 
 
