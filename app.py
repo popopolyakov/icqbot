@@ -5,7 +5,8 @@ from os.path import join, dirname
 from dotenv import load_dotenv
 import json
 import requests
-import country
+import data
+import pandas as pd
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -44,7 +45,7 @@ def message_cb(bot, event):
                 bot.send_text(chat_id=curUser, text=covidinfo)
         else:
             coun = back[1][0].upper() + back[1][1:].lower()
-            wed_site = 'https://api.thevirustracker.com/free-api?countryTotal=' + country.country[coun]
+            wed_site = 'https://api.thevirustracker.com/free-api?countryTotal=' + data.country[coun]
             text = requests.get(wed_site)
             if text.status_code != 200:
                 # This means something went wrong.
@@ -78,7 +79,7 @@ def message_cb(bot, event):
                 bot.send_text(chat_id=curUser, text=covidinfo)
         else:
             coun = back[1][0].upper() + back[1][1:].lower()
-            wed_site = 'https://api.thevirustracker.com/free-api?countryTotal=' + country.country[coun]
+            wed_site = 'https://api.thevirustracker.com/free-api?countryTotal=' + data.country[coun]
             text = requests.get(wed_site)
             if text.status_code != 200:
                 # This means something went wrong.
@@ -123,16 +124,21 @@ def testcommands(bot, event):
     pass
 
 
+def recommendation(bot, event):
+    bot.send_text(chat_id=event.from_chat,
+                  text=data.recomend)
+
+
 def stat(bot, event):
     bot.send_text(chat_id=event.from_chat,
-                  text="Для получения статистики о коронавирусе введите период(всего или сегодня) "
-                       "и место(страна или мир). Например: сегодня Россия, всего мир")
+                  text=data.recomend)
 
 
 bot.dispatcher.add_handler(MessageHandler(callback=message_cb))
 bot.dispatcher.add_handler(CommandHandler(command='info', callback=stat))
 bot.dispatcher.add_handler(CommandHandler(command='start', callback=startmes))
 bot.dispatcher.add_handler(CommandHandler(command='gettest', callback=runTests))
+bot.dispatcher.add_handler(CommandHandler(command='recommend', callback=recommendation))
 bot.dispatcher.add_handler(BotButtonCommandHandler(callback=testcommands))
 bot.start_polling()
 bot.idle()
