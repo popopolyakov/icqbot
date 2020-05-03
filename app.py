@@ -5,6 +5,7 @@ from os.path import join, dirname
 from dotenv import load_dotenv
 import json
 import requests
+import time
 
 
 dotenv_path = join(dirname(__file__), 'token.env')
@@ -18,9 +19,22 @@ bot = Bot(token=TOKEN)
 # class tests(user):
 #     def __init__(self):
 
-def startmes(bot, event):
+def start_mes(bot, event):
     if event.data['msgId']['text'] == '/start':
-        bot.send_text(chat_id=event.from_chat, text='Привет')
+
+        nowtime = time.ctime()
+        mas_time1=nowtime.split(":")
+        mas_time2 = mas_time1[0]
+        mas_time3 = mas_time2.split(" ")
+        int_hour = int(mas_time3[4])
+
+        if int_hour < 12:
+            bot.send_text(chat_id=event.from_chat, text='Доброе утро')
+        if int_hour >= 18:
+            bot.send_text(chat_id=event.from_chat, text='Добрый вечер')
+        else:
+            bot.send_text(chat_id=event.from_chat, text='Добрый день')
+        print("привет")
 
 def message_cb(bot, event):
     text=requests.get('https://api.thevirustracker.com/free-api',params={'global': 'stats'},)
@@ -90,7 +104,7 @@ def testcommands(bot, event):
 
 
 bot.dispatcher.add_handler(MessageHandler(callback=message_cb))
-bot.dispatcher.add_handler(CommandHandler(command='start',callback=startmes))
+bot.dispatcher.add_handler(CommandHandler(command='start',callback=start_mes))
 bot.dispatcher.add_handler(CommandHandler(command='gettest',callback=runTests))
 bot.dispatcher.add_handler(BotButtonCommandHandler(callback=testcommands))
 bot.start_polling()
