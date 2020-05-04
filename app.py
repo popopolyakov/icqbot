@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import json
 import requests
 import data
-import pandas as pd
+
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -121,17 +121,33 @@ def runTests(bot, event):
 
 
 def testcommands(bot, event):
-    pass
+    if event.data['callbackData'] == "1_recommend":
+        bot.send_text(chat_id=event.from_chat,
+                      text=data.info)
+
+    if event.data['callbackData'] == "2_recommend":
+        bot.send_text(chat_id=event.from_chat,
+                      text=data.info)
+
+    if event.data['callbackData'] == "3_recommend":
+        bot.send_text(chat_id=event.from_chat,
+                      text=data.info)
 
 
 def recommendation(bot, event):
     bot.send_text(chat_id=event.from_chat,
-                  text=data.recomend)
+                  text=data.main_recomend,
+                  inline_keyboard_markup="{}".format(json.dumps([[
+                      {"text": "1", "callbackData": "1_recommend", "style": "attention"},
+                      {"text": "2", "callbackData": "2_recommend", "style": "attention"},
+                      {"text": "3", "callbackData": "3_recommend", "style": "attention"}
+                  ]])))
 
 
 def stat(bot, event):
     bot.send_text(chat_id=event.from_chat,
-                  text=data.recomend)
+                  text=data.info)
+
 
 
 bot.dispatcher.add_handler(MessageHandler(callback=message_cb))
