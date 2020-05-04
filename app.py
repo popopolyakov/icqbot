@@ -123,15 +123,16 @@ def runTests(bot, event):
 def testcommands(bot, event):
     if event.data['callbackData'] == "1_recommend":
         bot.send_text(chat_id=event.from_chat,
-                      text=data.info)
+                      text=data.recommend_1)
 
     if event.data['callbackData'] == "2_recommend":
         bot.send_text(chat_id=event.from_chat,
-                      text=data.info)
+                      text=data.recommend_2)
 
     if event.data['callbackData'] == "3_recommend":
-        bot.send_text(chat_id=event.from_chat,
-                      text=data.info)
+        curUser = event.data['from']['userId']
+        bot.send_text(chat_id=curUser,
+                      text=data.recommend_3)
 
 
 def recommendation(bot, event):
