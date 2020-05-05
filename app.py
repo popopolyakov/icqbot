@@ -2,7 +2,7 @@ import database
 import numpy
 from bot.bot import Bot
 from bot.filter import Filter
-from bot.handler import MessageHandler, CommandHandler, BotButtonCommandHandler, HelpCommandHandler
+from bot.handler import MessageHandler, CommandHandler, BotButtonCommandHandler, HelpCommandHandler, UnknownCommandHandler
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
@@ -70,7 +70,7 @@ def start_mes(bot, event):
 
     if int_hour < 12:
         bot.send_text(chat_id=event.from_chat, text='Доброе утро, {0}!'.format(event.data['from']['firstName']))
-    if int_hour >= 18:
+    elif int_hour >= 18:
         bot.send_text(chat_id=event.from_chat, text='Добрый вечер, {0}!'.format(event.data['from']['firstName']))
     else:
         bot.send_text(chat_id=event.from_chat, text='Добрый день, {0}!'.format(event.data['from']['firstName']))
@@ -80,7 +80,8 @@ def start_mes(bot, event):
                                                 '1) Статистика по короновирусу - напиши: /info \n'
                                                 '2) Рекомендации по короновирусу - напиши: /recommend \n'
                                                 '3) Тест на психологическое состояние во время самоизоляции - напиши: /gettest \n'
-                                                '4) Игра "Stop Covid-19" на повышение настроения - напиши: /game \n\n'
+                                                '4) Сервисы, которые помогут не заскучать на карантине - напиши: /getfun \n'
+                                                '5) Игра "Stop Covid-19" на повышение настроения - напиши: /game \n\n'
                                                 'P.S Чтобы подробнее ознакомиться с возможностями бота,'
                                                 ' напиши: /help \n'
                                                 '{0}'.format(prorvemsia, russia))
@@ -102,7 +103,7 @@ def message_cb(bot, event):
             total_deaths = data['results'][0]['total_deaths']
             today_cases = data['results'][0]['total_new_cases_today']
             todaydeaths = data['results'][0]['total_new_deaths_today']
-            covidinfo = 'Мир' + \
+            covidinfo = 'Мир:' + \
                         '\nВсего заразившихся %s' % total_cases + \
                         '\nВсего выздоровело %s' % total_recovered + \
                         '\nВсего умерло %s' % total_deaths + \
@@ -139,7 +140,7 @@ def message_cb(bot, event):
     reg_data = database.regions_stat
     if region in reg_data:
         print(reg_data)
-        covidinfo = region + \
+        covidinfo = region+':' + \
                     '\nВсего заразившихся %s' % reg_data[region]['data_confirmed'] + \
                     '\nВсего вылечено %s' % reg_data[region]['data_cured'] + \
                     '\nВсего умерло %s' % reg_data[region]['data_deaths'] + \
@@ -153,10 +154,9 @@ def message_cb(bot, event):
 
 def runTests(bot, event):
     bot.send_text(chat_id=event.from_chat,
-                  text='Привет, это тест на определение вашего психологического спокойствия во время самоизоляции. Нажми "Начать" или "Отмена"',
+                  text='Привет, это тест на определение вашего психологического спокойствия во время самоизоляции. Нажми "Начать"',
                   inline_keyboard_markup="{}".format(json.dumps([[
                       {"text": "Начать тест", "callbackData": "0_0"},
-                      {"text": "Отмена", "callbackData": "cancel", "style": "attention"},
                   ]])))
 
 
@@ -165,7 +165,6 @@ def testcommands(bot, event):
     if event.data['callbackData'] == "1_recommend":
         bot.send_text(chat_id=curUser,
                       text=database.recommend_1)
-
     if event.data['callbackData'] == "2_recommend":
         bot.send_text(chat_id=curUser,
                       text=database.recommend_2)
@@ -175,14 +174,69 @@ def testcommands(bot, event):
         bot.send_text(chat_id=curUser,
                       text=database.recommend_3)
 
+    print(event.data)
+    curUser = event.data['from']['userId']
+    msg_id1 = event.data['message']['msgId']
+    print(msg_id1)
+    print(curUser)
+    otvet = event.data['callbackData']
+    # print(d)
+    # print(emogi_otvet)
+
+
+
+    if otvet == "1":
+        bot.edit_text(chat_id=curUser, msg_id=msg_id1,
+                      text='У тебя есть вакцина!\nВылечи человечка, кого считаешь зараженным! Но не промахнись!',
+                      inline_keyboard_markup="[{}]".format(json.dumps([
+                          {"text": emogi_otvet[0], "callbackData": "3"}, {"text": emogi_otvet[1], "callbackData": "3"},
+                          {"text": emogi_otvet[2], "callbackData": "3"}, {"text": emogi_otvet[3], "callbackData": "3"},
+                          {"text": emogi_otvet[4], "callbackData": "3"}, {"text": emogi_otvet[5], "callbackData": "3"},
+                          {"text": emogi_otvet[6], "callbackData": "3"}, {"text": emogi_otvet[7], "callbackData": "3"},
+                      ])))
+        index = 0
+        flg = False
+
+        f = open("jokes_like_a_grandfather_shit_in_a_stroller.txt")
+
+        kol_jokes = int(f.readline())
+        random_joke = random.randint(0, kol_jokes - 1)
+        print(random_joke)
+
+        while flg == False:
+
+            stroka = next(f)
+            if index == random_joke:
+                bot.send_text(chat_id=curUser, text="Правильно! Вот приз!\n "
+                                                    "Держи Секретный анекдот:\n"
+                                                    "{0}\n"
+                                                    "Чтобы сыграть еще раз - напиши: /game ".format(stroka))
+                flg = True
+            index += 1
+        f.close()
+
+    elif otvet == "0":
+        bot.edit_text(chat_id=curUser, msg_id=msg_id1,
+                      text='У тебя есть вакцина!\nВылечи человечка, кого считаешь зараженным! Но не промахнись!',
+                      inline_keyboard_markup="[{}]".format(json.dumps([
+                          {"text": emogi_otvet[0], "callbackData": "3"}, {"text": emogi_otvet[1], "callbackData": "3"},
+                          {"text": emogi_otvet[2], "callbackData": "3"}, {"text": emogi_otvet[3], "callbackData": "3"},
+                          {"text": emogi_otvet[4], "callbackData": "3"}, {"text": emogi_otvet[5], "callbackData": "3"},
+                          {"text": emogi_otvet[6], "callbackData": "3"}, {"text": emogi_otvet[7], "callbackData": "3"},
+                      ])))
+        bot.send_text(chat_id=curUser, text="Не угадал :(\nНичего страшного, начни сначала!\nНапиши: /game ")
+
+
     # print(bot)
     # print(event)
     # print(event.data['callbackData'])
     strToParse=event.data['callbackData'].split('_')
     stage = int(strToParse[0])
     count = int(strToParse[1])
+    photo=False
     if (len(strToParse)==3):
-        photo = bool(strToParse[2])
+        if strToParse[2]=='True':
+            photo=True
     print(count, stage)
     log='Count: %s Stage: %s' % (count, stage)
 
@@ -197,8 +251,8 @@ def testcommands(bot, event):
             newCounter.append(str(stage+1)+'_'+str(count+1))
         print(newCounter)
     else:
-        newCounter.append(str(stage+1)+'_'+str(count+1)+'_False')
-        newCounter.append(str(stage + 1) + '_' + str(count + 1) + '_True')
+        newCounter.append(str(stage+1)+'_'+str(count+1)+'_True')
+        newCounter.append(str(stage + 1) + '_' + str(count + 1) + '_False')
         print(newCounter)
     #######
     ##ЗНАЮ ЧТО МОЖНО по DRY вовее но надо быстрее на следующее переходить((((((((((((
@@ -261,18 +315,17 @@ def testcommands(bot, event):
             ]])))
     if stage == 8:
         print(newCounter, 'NEW COUNTER')
+        print(newCounter[0], newCounter[1])
         bot.edit_text(chat_id=curUser, msg_id=msg_id, text='Ваши результаты записаны, желаете узнать результат?',
                   inline_keyboard_markup="{}".format(json.dumps([[
                       {"text": 'Да, конечно', 'callbackData': newCounter[0]},
                       {"text": "Отмена", "callbackData": newCounter[1]},
                   ]])))
-    print(stage == 9 & photo==True)
+    print(photo)
     if stage == 9 and photo==True:
-        bot.send_text(chat_id=curUser, text=curCount)
         if (curCount>10):
             bot.send_text(chat_id=curUser, text='Поздравляем, вы здоровы. А чтобы еще вас развеселить, загрузите ваше фото :)',
                           inline_keyboard_markup="{}".format(json.dumps([[
-                              {"text": 'Прикрепить фото', 'callbackData': newCounter[0]},
                               {"text": "Отмена", "callbackData": newCounter[1]},
                           ]])))
             bot.send_text(chat_id=curUser, text='Ждем ваше фото')
@@ -284,7 +337,7 @@ def testcommands(bot, event):
             bot.send_text(chat_id=curUser, text='Поздравляем, вы здоровы')
         if (curCount < 12):
             bot.send_text(chat_id=curUser, text='Рекомендуем обратиться за помощью')
-        bot.send_text(chat_id=curUser, text='Спасибо за прохождение кода')
+        bot.send_text(chat_id=curUser, text='Спасибо за прохождение теста')
 
 def watermark_photo(input_image_path,
                     output_image_path,
@@ -319,19 +372,12 @@ def image_cb(bot,event):
         sys.exit(1)
     downloadphotojpg = photo+'.jpg'
     img.save(downloadphotojpg)
-    bot.send_text(chat_id=event.from_chat,
-                  text='Привет, это тест на определение вашего психологического спокойствия во время самоизоляции. Нажми "Начать" или "Отмена"',
-                  inline_keyboard_markup="{}".format(json.dumps([[
-                      {"text": "Пропустить", "callbackData": "0_0_true_none_none"},
-                      {"text": "Пропустить", "callbackData": "0_0_false_none_none"},
-                      {"text": "Отмена", "callbackData": "cancel", "style": "attention"},
-                  ]])))
 
 
     photolabel=photo+'_new.jpg'
     print(photolabel)
     watermark_photo(downloadphotojpg, photolabel,
-                    'zdorov.jpg', position=(0, 0))
+                    'zdorov.png', position=(0, 0))
     #print(event.data['chat']['chatId'], 'USER')
     with open(photolabel, "rb") as file:
         bot.send_file(chat_id=curUser, file=file)
@@ -463,7 +509,9 @@ def help_cb(bot, event):
     bot.send_text(chat_id=event.data['chat']['chatId'], text="/info - Статистика по короновирусу \n"
                   "/recommend - Рекомендации по короновирусу \n"
                   "/gettest - Тест на психологическое состояние во время самоизоляции \n"
-                  "/game - Игра 'Stop Covid-19' на повышение настроения \n")
+                  "/game - Игра 'Stop Covid-19' на повышение настроения \n"
+                  "/start - Показать приветственное сообщение \n"
+                  "/getfun - Сервисы, которые помогут хорошо провести с самоизоляцию \n")
 
 def getfun(bot, event):
     bot.send_text(chat_id=event.from_chat,
@@ -488,14 +536,13 @@ bot.dispatcher.add_handler(HelpCommandHandler(callback=help_cb))
 bot.dispatcher.add_handler(MessageHandler(callback=message_cb))
 bot.dispatcher.add_handler(MessageHandler(filters=Filter.image, callback=image_cb))
 bot.dispatcher.add_handler(CommandHandler(command='start',callback=start_mes))
-bot.dispatcher.add_handler(CommandHandler(command='getwebpage',callback=getwebpage))
-bot.dispatcher.add_handler(CommandHandler(command='gotosleep',callback=sleeps))
 bot.dispatcher.add_handler(CommandHandler(command='game',callback=mygame_mygame_bastaakanagana))
 bot.dispatcher.add_handler(CommandHandler(command='gettest',callback=runTests))
 bot.dispatcher.add_handler(CommandHandler(command='recommend', callback=recommendation))
 bot.dispatcher.add_handler(BotButtonCommandHandler(callback=testcommands))
 bot.dispatcher.add_handler(CommandHandler(command='info', callback=stat))
 bot.dispatcher.add_handler(CommandHandler(command='getfun', callback=getfun))
+bot.dispatcher.add_handler(UnknownCommandHandler(callback=UnknownCommand))
 
 bot.start_polling()
 bot.idle()
